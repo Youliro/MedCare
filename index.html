@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4A9F8C">
+<title>MedCare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#4A9F8C; --primary-dark:#2F7D6B; --mint:#BDF5D9; --mint-soft:#E4FBEF;
+  --text:#2E2E2E; --muted:#8A8A8A; --border:#D6D6D6; --bg:#FFFFFF; --page:#EEF3F1;
+  --danger:#D9534F; --warn:#E8A33D; --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Inter,system-ui,-apple-system,sans-serif;background:var(--page);color:var(--text);-webkit-font-smoothing:antialiased}
+body.big-text{font-size:17px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:inherit}
+:focus-visible{outline:3px solid #2F7D6B;outline-offset:2px}
+
+/* phone frame on desktop, full screen on mobile */
+.stage{min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px}
+.phone{position:relative;width:390px;height:844px;background:var(--bg);border-radius:48px;overflow:hidden;
+  box-shadow:0 0 0 12px #1c1c1e,0 0 0 14px #6b6470,0 30px 60px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:50}
+@media (max-width:500px){
+  .stage{padding:0;align-items:stretch}
+  .phone{width:100%;height:100dvh;border-radius:0;box-shadow:none}
+  .notch{display:none}
+}
+.screen{flex:1;overflow-y:auto;padding:58px 20px 24px;scroll-behavior:smooth}
+@media (max-width:500px){.screen{padding-top:calc(env(safe-area-inset-top) + 18px)}}
+.screen::-webkit-scrollbar{width:0}
+
+/* nav */
+.tabbar{display:flex;justify-content:space-around;border-top:1px solid #eee;padding:8px 6px calc(10px + env(safe-area-inset-bottom));background:#fff}
+.tabbar button{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);padding:4px 8px;border-radius:10px;min-width:58px}
+.tabbar button.active{color:var(--primary-dark);font-weight:600}
+.tabbar button.active svg{stroke:var(--primary-dark)}
+
+/* type */
+.title-row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.title-row h1{font-size:26px;font-weight:700;color:#3d3d3d}
+.back{color:var(--primary);width:32px;height:32px;display:grid;place-items:center;border-radius:10px;margin-left:-8px}
+.back:hover{background:var(--mint-soft)}
+h2{font-size:19px;font-weight:600;color:#3a3a3a;margin:22px 0 12px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.teal{color:var(--primary-dark)}
+
+/* form */
+label.f{display:block;font-size:13px;font-weight:500;color:#666;margin:16px 0 6px}
+.input{width:100%;border:1px solid var(--border);border-radius:10px;padding:13px 14px;font-size:14px;background:#fff;outline:none;transition:border .15s}
+.input:focus{border-color:var(--primary)}
+.input.err{border-color:var(--danger)}
+.err-msg{color:var(--danger);font-size:12px;margin-top:6px;min-height:0}
+textarea.input{resize:vertical;min-height:80px}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);stroke:#777}
+.search .input{padding-left:40px}
+
+.btn{width:100%;padding:14px;border-radius:10px;font-size:17px;font-weight:600;transition:transform .05s,filter .15s}
+.btn:active{transform:scale(.99)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{filter:brightness(.95)}
+.btn-primary:disabled{background:#a9cfc6;cursor:not-allowed}
+.btn-outline{border:1px solid var(--border);color:var(--primary);background:#fff}
+.btn-danger{background:#fff;border:1px solid var(--danger);color:var(--danger)}
+.btn-sm{width:auto;padding:9px 14px;font-size:14px;border-radius:10px}
+.link{color:var(--primary);font-size:12px;font-weight:600}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;margin:14px 0 4px}
+.chips::-webkit-scrollbar{height:0}
+.chip{flex:none;padding:9px 16px;border-radius:9px;background:var(--mint);color:var(--primary-dark);font-size:13px;font-weight:500;white-space:nowrap}
+.chip.on{background:var(--primary);color:#fff}
+.chip.outline{background:#fff;border:1px solid var(--primary);padding:5px 12px;font-size:12px;border-radius:8px}
+.chip.outline.on{background:var(--primary);color:#fff}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
+.seg .chip{text-align:center}
+
+/* cards */
+.card{border:1px solid #cfcfcf;border-radius:var(--radius);padding:14px;background:#fff;margin-bottom:14px;display:block;width:100%;text-align:left}
+button.card:hover,.card.clickable:hover{border-color:var(--primary);cursor:pointer}
+.row{display:flex;align-items:center;gap:12px}
+.grow{flex:1;min-width:0}
+.ava{flex:none;width:52px;height:52px;border-radius:50%;background:var(--mint);display:grid;place-items:center;color:var(--primary-dark);font-weight:700}
+.ava.sq{border-radius:16px;width:64px;height:64px}
+.badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--mint);color:var(--primary-dark);white-space:nowrap}
+.badge.grey{background:#eee;color:#777}
+.badge.warn{background:#FCEBD0;color:#9a6512}
+.badge.red{background:#fbe0df;color:#a33}
+.dot{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:0 5px}
+.mint-hero{background:var(--mint);border-radius:18px;padding:18px;display:flex;align-items:center;gap:16px}
+.mint-hero .circle{width:76px;height:76px;border-radius:50%;background:rgba(74,159,140,.15);display:grid;place-items:center;flex:none}
+.mint-hero h3{font-size:16px;color:#2c5a4f}
+.mint-hero p{font-size:12px;color:#4d7d71;margin-top:4px}
+
+/* login */
+.logo{width:72px;height:72px;border-radius:18px;background:var(--mint);display:grid;place-items:center;margin:20px auto 8px}
+.brand{text-align:center;font-size:30px;font-weight:800;color:var(--primary)}
+.tagline{text-align:center;font-size:12px;color:#777;font-weight:500;margin-top:2px}
+
+/* dashboard */
+.greet{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+.greet small{color:#777;font-size:14px;font-weight:500}
+.greet .name{font-size:24px;font-weight:500;color:#111;margin-top:2px}
+.ava-btn{width:58px;height:58px;border-radius:16px;background:var(--mint);display:grid;place-items:center}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.svc{background:var(--mint);border-radius:6px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#2c4b44;transition:filter .15s}
+.svc:hover{filter:brightness(.96)}
+.svc.center{grid-column:1 / -1;justify-self:center;width:calc(50% - 6px)}
+
+/* doctor slots */
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.slot{background:var(--mint);border-radius:6px;padding:8px 0;font-size:12px;font-weight:500;color:var(--primary-dark);text-align:center}
+.slot.on{background:var(--primary);color:#fff}
+.slot:disabled{background:#f1f1f1;color:#bbb;text-decoration:line-through;cursor:not-allowed}
+.days{display:flex;gap:8px;overflow-x:auto;margin:10px 0}
+.days::-webkit-scrollbar{height:0}
+.day{flex:none;width:56px;padding:8px 0;border-radius:12px;border:1px solid var(--border);text-align:center;font-size:12px}
+.day b{display:block;font-size:17px;margin-top:2px}
+.day.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* chat */
+.thread{display:flex;flex-direction:column;gap:8px;padding-bottom:8px}
+.msg{max-width:78%;padding:10px 13px;border-radius:16px;font-size:14px;line-height:1.4;word-wrap:break-word}
+.msg.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.msg.doc{align-self:flex-start;background:#f1f4f3;border-bottom-left-radius:4px}
+.msg time{display:block;font-size:10px;opacity:.7;margin-top:3px;text-align:right}
+.composer{display:flex;gap:8px;padding:10px 14px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #eee;background:#fff}
+.composer .input{border-radius:22px;padding:11px 16px}
+.send{width:44px;height:44px;border-radius:50%;background:var(--primary);display:grid;place-items:center;flex:none}
+.typing{align-self:flex-start;font-size:12px;color:var(--muted);padding:4px 6px}
+.chat-head{display:flex;align-items:center;gap:10px;padding:52px 14px 12px;border-bottom:1px solid #eee}
+@media (max-width:500px){.chat-head{padding-top:calc(env(safe-area-inset-top) + 12px)}}
+
+/* list menu */
+.menu{border:1px solid #ddd;border-radius:var(--radius);overflow:hidden}
+.menu button{display:flex;align-items:center;gap:14px;width:100%;padding:15px 14px;border-bottom:1px solid #eee;font-size:14px;text-align:left}
+.menu button:last-child{border-bottom:none}
+.menu button:hover{background:var(--mint-soft)}
+
+/* sheet + toast */
+.overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:60;display:flex;align-items:flex-end;animation:fade .2s}
+.sheet{background:#fff;width:100%;max-height:88%;overflow-y:auto;border-radius:22px 22px 0 0;padding:10px 20px calc(24px + env(safe-area-inset-bottom));animation:up .25s ease-out}
+.sheet .grab{width:40px;height:5px;background:#ddd;border-radius:3px;margin:0 auto 14px}
+.sheet h3{font-size:19px;margin-bottom:4px}
+.kv{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:14px;gap:12px}
+.kv span:first-child{color:var(--muted)}
+.kv span:last-child{text-align:right;font-weight:500}
+.toast{position:absolute;left:50%;bottom:90px;transform:translateX(-50%);background:#263f39;color:#fff;padding:11px 18px;border-radius:12px;font-size:13px;z-index:80;max-width:85%;text-align:center;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+table.lab{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+table.lab td,table.lab th{padding:8px 4px;border-bottom:1px solid #f0f0f0;text-align:left}
+table.lab th{color:var(--muted);font-weight:500}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:14px}
+.switch{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #eee;font-size:14px}
+.switch input{width:44px;height:24px;accent-color:var(--primary)}
+details{border:1px solid #e3e3e3;border-radius:12px;padding:12px 14px;margin-bottom:10px;font-size:14px}
+details summary{font-weight:600;cursor:pointer}
+details p{margin-top:8px;color:#555;line-height:1.5}
+.banner{border-radius:16px;overflow:hidden;background:var(--mint)}
+.success-ic{width:90px;height:90px;border-radius:50%;background:var(--mint);display:grid;place-items:center;margin:40px auto 18px}
+</style>
+</head>
+<body>
+<div class="stage"><div class="phone" id="phone"><div class="notch"></div><div id="app" style="display:flex;flex-direction:column;flex:1;min-height:0"></div></div></div>
+
+<script>
+/* ============ ICONS ============ */
+const IC = {
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  chev:'<path d="M9 18l6-6-6-6"/>',
+  home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  homeplus:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M12 10v6M9 13h6"/>',
+  file:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  pill:'<path d="M10.5 20.5a4.95 4.95 0 0 1-7-7l9-9a4.95 4.95 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/>',
+  chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/>',
+  ask:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/><path d="M10 9.5a2 2 0 1 1 2.8 1.8c-.5.3-.8.7-.8 1.2M12 15.5h.01"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  usercircle:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="10" r="3"/><path d="M6.2 18.4a6.5 6.5 0 0 1 11.6 0"/>',
+  stetho:'<path d="M5 3v5a5 5 0 0 0 10 0V3"/><path d="M10 13v2a5 5 0 0 0 10 0v-2"/><circle cx="20" cy="11" r="2"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9L7 7M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.7M12 17h.01"/>',
+  logout:'<path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4M16 17l5-5-5-5M21 12H9"/>',
+  flask:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3M7.5 14h9"/>',
+  send:'<path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/>',
+  heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  star:'<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  smile:'<circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9.5h.01M15 9.5h.01"/>',
+  rx:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+  hands:'<path d="M2 14l4-1 5 3h4a1.5 1.5 0 0 1 0 3H9M2 20l3-1 7 2 8-5a1.5 1.5 0 0 0-2-2l-4 2"/><path d="M12 3v6M9 6h6"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+};
+const icon = (n, s=22, c='currentColor', w=1.8) =>
+  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||''}</svg>`;
+
+/* ============ HELPERS ============ */
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const dayKey = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const addDays = (d,n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+const parseDay = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y,m-1,d); };
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const fmtDay = k => { const d = parseDay(k); return `${pad(d.getDate())} ${MON[d.getMonth()]} ${d.getFullYear()}`; };
+const fmtShort = k => { const d = parseDay(k); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+const fmtTime = t => { let [h,m] = t.split(':').map(Number); const ap = h>=12?'PM':'AM'; h = h%12||12; return `${pad(h)}:${pad(m)} ${ap}`; };
+const nowHM = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const today = () => dayKey(new Date());
+const uid = () => Math.random().toString(36).slice(2,10);
+const hash = s => { let h = 0; for (const c of s) h = (h*31 + c.charCodeAt(0)) | 0; return Math.abs(h); };
+const initials = n => n.replace(/^Dr\.\s*/,'').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const relDay = k => k===today() ? 'Today' : k===dayKey(addDays(new Date(),1)) ? 'Tomorrow' : k===dayKey(addDays(new Date(),-1)) ? 'Yesterday' : fmtShort(k);
+
+/* ============ STATIC DATA ============ */
+const DOCTORS = [
+  {id:'zia', name:'Dr. Zia Al K', spec:'Cardiologist', cat:'Cardiology', exp:12, rating:4.9, clinic:'MedCare Heart Center, Astana', fee:'12 000 ₸', about:'Specialist in hypertension, arrhythmia and preventive cardiology.'},
+  {id:'yildar', name:'Dr. Yildar', spec:'Dentist', cat:'Dentistry', exp:8, rating:4.8, clinic:'MedCare Dental, Astana', fee:'9 000 ₸', about:'General and cosmetic dentistry, check-ups and cleaning.'},
+  {id:'abuali', name:'Dr. Skak Abuali', spec:'Psychologist', cat:'Psychology', exp:10, rating:4.9, clinic:'MedCare Wellbeing, Astana', fee:'10 000 ₸', about:'Stress, anxiety and sleep problems. Online and in-person sessions.'},
+  {id:'tamerlan', name:'Dr. Tamerlan Bodoh', spec:'General Physician', cat:'General', exp:15, rating:4.7, clinic:'MedCare Clinic No. 1, Astana', fee:'7 000 ₸', about:'Annual check-ups, common illnesses and referrals to specialists.'},
+  {id:'dudung', name:'Dr. Dudung', spec:'Neurologist', cat:'Neurology', exp:11, rating:4.6, clinic:'MedCare Neuro, Astana', fee:'11 000 ₸', about:'Headaches, migraines, dizziness and nerve pain.'},
+  {id:'prabowo', name:'Dr. Prabowo', spec:'Therapist', cat:'General', exp:9, rating:4.7, clinic:'MedCare Clinic No. 2, Astana', fee:'7 500 ₸', about:'Internal medicine and chronic disease follow-up.'},
+  {id:'subianto', name:'Dr. Subianto', spec:'Gastroenterologist', cat:'General', exp:13, rating:4.8, clinic:'MedCare Clinic No. 1, Astana', fee:'11 500 ₸', about:'Digestive health, nutrition and stomach pain.'},
+  {id:'bahlil', name:'Dr. Bahlil', spec:'Pediatrician', cat:'Pediatrics', exp:7, rating:4.9, clinic:'MedCare Kids, Astana', fee:'8 000 ₸', about:'Care for children from birth to 18, vaccinations.'},
+];
+const CATS = ['All','Cardiology','Dentistry','Psychology','Neurology','General','Pediatrics'];
+const TIMES = ['09:00','10:00','11:30','12:00','14:00','15:30','17:00'];
+const doc = id => DOCTORS.find(d => d.id === id);
+
+/* ============ STORE (localStorage) ============ */
+const KEY = 'medcare_v1';
+let S;
+function load(){
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch(e) { S = null; }
+  if (!S || !S.users) S = freshStore();
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+function freshStore(){
+  // Demo account — prototype only, passwords are not hashed.
+  const demo = {id:'u1', name:'Rusdi Ngawi', phone:'77771243284', iin:'990101300123', password:'medcare123',
+    birth:'1999-01-01', blood:'A (II) Rh+', allergies:'Penicillin', address:'Astana, Mangilik El 55'};
+  return {users:[demo], session:null, data:{u1:seedData()}, settings:{big:false, notif:true}};
+}
+function seedData(){
+  const t = new Date();
+  const d = n => dayKey(addDays(t,n));
+  const ago = (n,h,m) => { const x = addDays(t,-n); x.setHours(h,m,0,0); return x.getTime(); };
+  const at = (h,m) => { const x = new Date(); x.setHours(h,m,0,0); return Math.min(x.getTime(), Date.now()-60000); };
+  return {
+    bookings:[
+      {id:uid(), doctorId:'abuali', date:d(1), time:'10:00', status:'booked', reason:'Follow-up session'},
+      {id:uid(), doctorId:'tamerlan', date:d(1), time:'12:00', status:'booked', reason:'Annual check-up'},
+    ],
+    records:[
+      {id:'r1', type:'Visits', title:'General Checkup', date:'2026-10-15', time:'10:00', doctorId:'tamerlan', sub:'General Physician',
+        notes:'Patient feels well. BP 118/76, pulse 72. Recommended annual blood test and 30 min of walking daily.'},
+      {id:'r2', type:'Lab Results', title:'Lab Results', date:'2026-10-10', time:'09:30', doctorId:'yildar', sub:'Blood Test - Complete Blood Count',
+        lab:[['Hemoglobin','142 g/L','130–170'],['WBC','6.1 ×10⁹/L','4.0–9.0'],['RBC','4.8 ×10¹²/L','4.0–5.5'],['Platelets','245 ×10⁹/L','150–400'],['ESR','8 mm/h','2–15']],
+        notes:'All values within reference ranges.'},
+      {id:'r3', type:'Prescriptions', title:'Prescription', date:'2026-10-05', time:'11:00', doctorId:'abuali', sub:'Paracetamol, Amoxicillin',
+        notes:'Paracetamol 500 mg twice a day after meals for 5 days. Amoxicillin 250 mg three times a day for 7 days.'},
+      {id:'r4', type:'Visits', title:'Home Visit', date:'2026-09-28', time:'14:00', doctorId:'zia', sub:'Cardiology home visit',
+        notes:'ECG at home: normal sinus rhythm. Continue current treatment, follow-up in 3 months.'},
+    ],
+    meds:[
+      {id:'m1', name:'Paracetamol 500mg', form:'tablet', dose:'1 tablet', when:'After Meal', freq:'Twice a day', times:['08:00','20:00'], status:'current', start:d(-3), end:d(2)},
+      {id:'m2', name:'Amoxicillin 250mg', form:'capsule', dose:'1 capsule', when:'After Meal', freq:'Three times a day', times:['08:00','14:00','20:00'], status:'current', start:d(-3), end:d(4)},
+      {id:'m3', name:'Vitamin D3 1000 IU', form:'capsule', dose:'1 capsule', when:'Morning', freq:'Once a day', times:['09:00'], status:'current', start:d(-10), end:d(50)},
+      {id:'m4', name:'Omeprazole 20mg', form:'capsule', dose:'1 capsule', when:'Before Breakfast', freq:'Once a day', times:['07:30'], status:'upcoming', start:d(3), end:d(17)},
+      {id:'m5', name:'Ibuprofen 400mg', form:'tablet', dose:'1 tablet', when:'After Meal', freq:'Twice a day', times:['09:00','21:00'], status:'history', start:'2026-09-01', end:'2026-09-07'},
+    ],
+    taken:{},
+    visits:[
+      {id:uid(), doctorId:'yildar', date:d(5), from:'14:00', to:'15:00', status:'Confirmed', address:'Astana, Mangilik El 55', reason:'Follow-up after treatment'},
+      {id:uid(), doctorId:'zia', date:'2026-09-28', from:'14:00', to:'15:00', status:'Completed', address:'Astana, Mangilik El 55', reason:'ECG at home'},
+      {id:uid(), doctorId:'tamerlan', date:'2026-08-12', from:'10:00', to:'11:00', status:'Completed', address:'Astana, Mangilik El 55', reason:'Fever'},
+    ],
+    chats:{
+      dudung:{unread:2, msgs:[
+        {from:'me', text:'Good morning doctor, I have had a headache for three days.', t:ago(1,9,10)},
+        {from:'doc', text:'Good morning! Is the pain on one side or both sides of the head?', t:ago(1,9,30)},
+        {from:'me', text:'Both sides, mostly in the evening.', t:ago(1,9,45)},
+        {from:'doc', text:'Please drink enough water and keep a short pain diary.', t:at(10,30)},
+        {from:'doc', text:'Hello, is your headache still here?', t:at(10,36)},
+      ]},
+      prabowo:{unread:0, msgs:[
+        {from:'doc', text:'Your blood pressure looks good. Keep the same routine.', t:ago(1,16,0)},
+        {from:'me', text:'Thank you for your advice!', t:ago(1,16,5)},
+      ]},
+      subianto:{unread:0, msgs:[
+        {from:'me', text:'Can I take medicine with food?', t:new Date(2026,9,15,12,0).getTime()},
+      ]},
+      bahlil:{unread:0, msgs:[
+        {from:'me', text:'My son has a mild fever after the vaccine. Is that okay?', t:new Date(2026,9,12,18,0).getTime()},
+        {from:'doc', text:"Yes, it's normal. Do not worry.", t:new Date(2026,9,12,18,20).getTime()},
+      ]},
+    },
+  };
+}
+const me = () => S.users.find(u => u.id === S.session);
+const D = () => S.data[S.session];
+
+/* ============ ROUTER ============ */
+const app = document.getElementById('app');
+const go = h => { location.hash = h; };
+const backTo = h => () => history.length > 1 ? history.back() : go(h);
+window.addEventListener('hashchange', render);
+
+function route(){
+  const h = location.hash.slice(1) || 'home';
+  const [path, qs] = h.split('?');
+  const parts = path.split('/');
+  return {name:parts[0], id:parts[1], q:new URLSearchParams(qs||'')};
+}
+
+const ROUTES = {};
+function render(){
+  load();
+  document.body.classList.toggle('big-text', !!S.settings.big);
+  const r = route();
+  if (!S.session && !['login','register'].includes(r.name)) { go('login'); return; }
+  if (S.session && ['login','register'].includes(r.name)) { go('home'); return; }
+  const fn = ROUTES[r.name] || ROUTES.home;
+  const out = fn(r);
+  const html = typeof out === 'string' ? {body:out, tab:null} : out;
+  app.innerHTML = (html.raw ? html.body : `<main class="screen" id="scr">${html.body}</main>`) + (html.tab ? tabbar(html.tab) : '');
+  html.after && html.after();
+}
+function tabbar(active){
+  const t = [['home','home','Home'],['doctors','stetho','Doctors'],['chats','chat','Chats'],['records','file','Records'],['profile','user','Profile']];
+  const unread = Object.values(D().chats).reduce((a,c)=>a+(c.unread||0),0);
+  return `<nav class="tabbar" aria-label="Main">${t.map(([r,i,l]) =>
+    `<button class="${active===r?'active':''}" onclick="go('${r}')" aria-current="${active===r?'page':'false'}">
+      <span style="position:relative">${icon(i,22)}${r==='chats'&&unread?`<span class="dot" style="position:absolute;top:-6px;right:-10px">${unread}</span>`:''}</span>${l}</button>`).join('')}</nav>`;
+}
+const header = (title, back='home') =>
+  `<div class="title-row"><button class="back" aria-label="Back" onclick="go('${back}')">${icon('back',24,'currentColor',2.4)}</button><h1>${esc(title)}</h1></div>`;
+
+/* ============ UI HELPERS ============ */
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const el = document.createElement('div'); el.className='toast'; el.textContent=msg; el.setAttribute('role','status');
+  document.getElementById('phone').appendChild(el);
+  setTimeout(()=>el.remove(), 2600);
+}
+function sheet(html){
+  closeSheet();
+  const o = document.createElement('div'); o.className='overlay'; o.id='overlay';
+  o.innerHTML = `<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
+  o.addEventListener('click', e => { if (e.target === o) closeSheet(); });
+  document.getElementById('phone').appendChild(o);
+  const f = o.querySelector('input,textarea,select,button'); f && f.focus({preventScroll:true});
+}
+function closeSheet(){ document.getElementById('overlay')?.remove(); }
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeSheet(); });
+function confirmBox(title, text, okLabel, onOk){
+  sheet(`<h3>${esc(title)}</h3><p class="muted" style="margin:6px 0 20px;font-size:14px">${esc(text)}</p>
+    <button class="btn btn-danger" id="cOk">${esc(okLabel)}</button>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="closeSheet()">Cancel</button>`);
+  document.getElementById('cOk').onclick = () => { closeSheet(); onOk(); };
+}
+function setErr(id, msg){
+  const i = document.getElementById(id), e = document.getElementById(id+'Err');
+  i && i.classList.toggle('err', !!msg); if (e) e.textContent = msg||'';
+  return !msg;
+}
+
+/* ============ S1 LOGIN ============ */
+function normalizeId(v){
+  const s = v.replace(/[\s\-()]/g,'');
+  if (/^\d{12}$/.test(s)) return {iin:s};
+  let p = s.replace(/^\+/,'');
+  if (/^8\d{10}$/.test(p)) p = '7'+p.slice(1);
+  if (/^7\d{10}$/.test(p)) return {phone:p};
+  return null;
+}
+const fmtPhone = p => `+7 ${p.slice(1,4)} ${p.slice(4,7)} ${p.slice(7,9)} ${p.slice(9)}`;
+
+ROUTES.login = () => ({body:`
+  <div class="logo">${icon('plus',44,'#2F7D6B',2.6)}</div>
+  <div class="brand">MedCare</div>
+  <div class="tagline">Your health, made easier</div>
+  <form id="loginForm" novalidate style="margin-top:28px">
+    <label class="f" for="lid">IIN / Phone Number</label>
+    <input class="input" id="lid" autocomplete="username" placeholder="Enter IIN or Phone Number" inputmode="tel">
+    <div class="err-msg" id="lidErr"></div>
+    <label class="f" for="lpw">Password / Verification code</label>
+    <input class="input" id="lpw" type="password" autocomplete="current-password" placeholder="Enter password or code">
+    <div class="err-msg" id="lpwErr"></div>
+    <div style="text-align:right;margin-top:8px"><button type="button" class="link" onclick="forgot()">Forgot password?</button></div>
+    <button class="btn btn-primary" style="margin-top:56px">Log In</button>
+  </form>
+  <p class="small muted" style="text-align:center;margin:12px 0">Don't have an account?</p>
+  <button class="btn btn-outline" onclick="go('register')">Create Account</button>
+  <button class="link" style="display:block;margin:18px auto 0" onclick="fillDemo()">Use demo account</button>
+`, after(){
+  document.getElementById('loginForm').onsubmit = e => {
+    e.preventDefault();
+    const idv = document.getElementById('lid').value.trim(), pw = document.getElementById('lpw').value;
+    const n = normalizeId(idv);
+    let ok = setErr('lid', !idv ? 'Enter your IIN or phone number' : !n ? 'IIN must be 12 digits, phone like +7 777 123 45 67' : '');
+    ok = setErr('lpw', !pw ? 'Enter your password' : '') && ok;
+    if (!ok) return;
+    const u = S.users.find(u => (n.iin && u.iin === n.iin) || (n.phone && u.phone === n.phone));
+    if (!u || u.password !== pw) { setErr('lpw', 'Incorrect IIN/phone or password'); return; }
+    S.session = u.id; save(); go('home');
+  };
+}});
+window.fillDemo = () => { document.getElementById('lid').value = '+7 777 124 32 84'; document.getElementById('lpw').value = 'medcare123'; };
+window.forgot = () => sheet(`<h3>Reset password</h3><p class="muted small" style="margin-bottom:6px">We will send a verification code by SMS.</p>
+  <label class="f" for="fid">IIN / Phone Number</label><input class="input" id="fid" placeholder="+7 7__ ___ __ __">
+  <div class="err-msg" id="fidErr"></div>
+  <button class="btn btn-primary" style="margin-top:18px" onclick="if(setErr('fid', normalizeId(document.getElementById('fid').value)?'':'Enter a valid IIN or phone')){closeSheet();toast('Demo: a verification code would be sent by SMS')}">Send code</button>`);
+
+/* ============ REGISTER ============ */
+ROUTES.register = () => ({body:`
+  ${header('Create Account','login')}
+  <form id="regForm" novalidate>
+    <label class="f" for="rname">Full name</label><input class="input" id="rname" autocomplete="name" placeholder="e.g. Aruzhan Sadykova"><div class="err-msg" id="rnameErr"></div>
+    <label class="f" for="rid">IIN or Phone Number</label><input class="input" id="rid" placeholder="12-digit IIN or +7 ..."><div class="err-msg" id="ridErr"></div>
+    <label class="f" for="rpw">Password</label><input class="input" id="rpw" type="password" autocomplete="new-password" placeholder="At least 6 characters"><div class="err-msg" id="rpwErr"></div>
+    <label class="f" for="rpw2">Repeat password</label><input class="input" id="rpw2" type="password" autocomplete="new-password"><div class="err-msg" id="rpw2Err"></div>
+    <label style="display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#666;margin-top:16px"><input type="checkbox" id="rok" style="margin-top:2px;accent-color:var(--primary)"> I agree to the processing of my personal medical data for the purpose of receiving care.</label>
+    <div class="err-msg" id="rokErr"></div>
+    <button class="btn btn-primary" style="margin-top:24px">Create Account</button>
+  </form>`, after(){
+  document.getElementById('regForm').onsubmit = e => {
+    e.preventDefault();
+    const v = id => document.getElementById(id).value.trim();
+    const n = normalizeId(v('rid'));
+    const taken = n && S.users.some(u => (n.iin && u.iin===n.iin) || (n.phone && u.phone===n.phone));
+    let ok = setErr('rname', v('rname').length < 2 ? 'Enter your name' : '');
+    ok = setErr('rid', !n ? 'Enter a 12-digit IIN or a +7 phone number' : taken ? 'An account with this IIN/phone already exists' : '') && ok;
+    ok = setErr('rpw', document.getElementById('rpw').value.length < 6 ? 'Password must be at least 6 characters' : '') && ok;
+    ok = setErr('rpw2', document.getElementById('rpw').value !== document.getElementById('rpw2').value ? 'Passwords do not match' : '') && ok;
+    const c = document.getElementById('rok').checked; document.getElementById('rokErr').textContent = c ? '' : 'Consent is required'; ok = ok && c;
+    if (!ok) return;
+    const u = {id:'u'+uid(), name:v('rname'), phone:n.phone||'', iin:n.iin||'', password:document.getElementById('rpw').value, birth:'', blood:'', allergies:'', address:''};
+    S.users.push(u);
+    const data = seedData(); data.bookings = []; data.records = []; data.chats = {}; data.visits = []; data.meds = []; // new users start empty
+    S.data[u.id] = data; S.session = u.id; save();
+    go('home'); setTimeout(()=>toast('Welcome to MedCare, '+u.name.split(' ')[0]+'!'), 100);
+  };
+}});
+
+/* ============ S2 DASHBOARD ============ */
+function upcomingBookings(){
+  const n = today(), t = nowHM();
+  return D().bookings.filter(b => b.status==='booked' && (b.date > n || (b.date===n && b.time >= t)))
+    .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+}
+ROUTES.home = () => {
+  const u = me(), h = new Date().getHours();
+  const greet = h < 12 ? 'Good morning,' : h < 18 ? 'Good afternoon,' : 'Good evening,';
+  const up = upcomingBookings();
+  const nd = nextDose();
+  return {tab:'home', body:`
+    <div class="greet"><div><small>${greet}</small><div class="name">${esc(u.name)}</div></div>
+      <button class="ava-btn" aria-label="Profile" onclick="go('profile')">${icon('usercircle',38,'#2F7D6B',1.6)}</button></div>
+    <form class="search" onsubmit="event.preventDefault();go('doctors?q='+encodeURIComponent(this.q.value))">
+      ${icon('search',18)}<input class="input" name="q" placeholder="Search doctors or specialities.." aria-label="Search doctors"></form>
+    <h2>Medical Services</h2>
+    <div class="services">
+      <button class="svc" onclick="go('doctors')">${icon('plus',22,'#2F7D6B',2.2)}Book Appointment</button>
+      <button class="svc" onclick="go('records')">${icon('file',22,'#2F7D6B')}Medical Records</button>
+      <button class="svc" onclick="go('visits')">${icon('home',22,'#2F7D6B')}Home Visit</button>
+      <button class="svc" onclick="go('meds')">${icon('pill',22,'#2F7D6B')}Medication</button>
+      <button class="svc center" onclick="go('chats')">${icon('ask',22,'#2F7D6B')}Ask Doctor</button>
+    </div>
+    ${nd ? `<button class="card clickable" style="margin-top:18px;background:var(--mint-soft);border-color:var(--mint)" onclick="go('meds')">
+      <div class="row">${icon('bell',22,'#2F7D6B')}<div class="grow"><b style="font-size:14px">Next dose: ${esc(nd.med.name)}</b>
+      <div class="small muted">${relDay(nd.day)}, ${fmtTime(nd.time)}</div></div>${icon('chev',18,'#888')}</div></button>`:''}
+    <h2>Upcoming Appointment${up.length===1?'':'s'}</h2>
+    ${up.length ? up.map(b => { const d = doc(b.doctorId); return `
+      <button class="card" onclick="apptSheet('${b.id}')">
+        <div class="teal" style="font-size:13px;font-weight:600">${esc(d.name)} &nbsp;- ${esc(d.spec)}</div>
+        <div class="small muted" style="margin-top:12px">${relDay(b.date)}, ${fmtShort(b.date)} &nbsp;${fmtTime(b.time)}</div></button>`; }).join('')
+      : `<div class="card empty">No upcoming appointments.<br><button class="link" style="margin-top:8px;font-size:14px" onclick="go('doctors')">Find a doctor</button></div>`}
+  `};
+};
+window.apptSheet = id => {
+  const b = D().bookings.find(x=>x.id===id); if (!b) return; const d = doc(b.doctorId);
+  sheet(`<div class="row" style="margin-bottom:12px"><div class="ava">${initials(d.name)}</div><div><h3>${esc(d.name)}</h3><div class="small teal">${esc(d.spec)}</div></div></div>
+    <div class="kv"><span>Date</span><span>${fmtDay(b.date)}</span></div>
+    <div class="kv"><span>Time</span><span>${fmtTime(b.time)}</span></div>
+    <div class="kv"><span>Clinic</span><span>${esc(d.clinic)}</span></div>
+    <div class="kv"><span>Fee</span><span>${esc(d.fee)}</span></div>
+    ${b.reason?`<div class="kv"><span>Reason</span><span>${esc(b.reason)}</span></div>`:''}
+    <div class="kv"><span>Status</span><span><span class="badge">Confirmed</span></span></div>
+    <button class="btn btn-primary" style="margin-top:18px" onclick="closeSheet();go('doctor/${d.id}?resched=${b.id}')">Reschedule</button>
+    <button class="btn btn-danger" style="margin-top:10px" onclick="cancelAppt('${b.id}')">Cancel appointment</button>`);
+};
+window.cancelAppt = id => confirmBox('Cancel appointment?', 'The time slot will be released for other patients. This cannot be undone.', 'Yes, cancel', () => {
+  const b = D().bookings.find(x=>x.id===id); b.status = 'cancelled'; save(); render(); toast('Appointment cancelled');
+});
+
+/* ============ S3 FIND A DOCTOR ============ */
+function slotState(docId, day, time){
+  const n = today();
+  if (day < n || (day === n && time <= nowHM())) return 'past';
+  for (const uidKey of Object.keys(S.data)) {
+    if (S.data[uidKey].bookings.some(b => b.status==='booked' && b.doctorId===docId && b.date===day && b.time===time))
+      return uidKey === S.session ? 'mine' : 'busy';
+  }
+  if (hash(docId+day+time) % 4 === 0) return 'busy'; // simulated other patients
+  return 'free';
+}
+function freeSlots(docId, day){ return TIMES.filter(t => slotState(docId, day, t) === 'free'); }
+function firstDayWithSlots(docId){ for (let i=0;i<14;i++){ const k = dayKey(addDays(new Date(),i)); if (freeSlots(docId,k).length) return k; } return today(); }
+
+let pick = {doc:null, day:null, time:null};
+ROUTES.doctors = r => {
+  const q = (r.q.get('q')||'').trim().toLowerCase(), cat = r.q.get('cat') || 'All';
+  const list = DOCTORS.filter(d => (cat==='All'||d.cat===cat) && (!q || (d.name+' '+d.spec+' '+d.cat).toLowerCase().includes(q)));
+  const qs = (c, qq=q) => `doctors?cat=${encodeURIComponent(c)}${qq?'&q='+encodeURIComponent(qq):''}`;
+  return {tab:'doctors', body:`
+    ${header('Find a Doctor')}
+    <form class="search" onsubmit="event.preventDefault();go('${qs(cat,'')}'.split('&q=')[0]+(this.q.value?'&q='+encodeURIComponent(this.q.value):''))">
+      ${icon('search',18)}<input class="input" name="q" value="${esc(r.q.get('q')||'')}" placeholder="Search doctors or specialities.." aria-label="Search doctors"></form>
+    <div class="chips" role="tablist">${CATS.map(c=>`<button class="chip ${c===cat?'on':''}" role="tab" aria-selected="${c===cat}" onclick="go('${qs(c)}')">${c}</button>`).join('')}</div>
+    <div style="margin-top:12px">${list.length ? list.map(docCard).join('') : `<div class="empty">No doctors found${q?` for “${esc(q)}”`:''}.</div>`}</div>
+  `};
+};
+function docCard(d){
+  const day = firstDayWithSlots(d.id), slots = freeSlots(d.id, day).slice(0,3);
+  const sel = pick.doc === d.id;
+  return `<div class="card">
+    <div class="row" style="cursor:pointer" onclick="go('doctor/${d.id}')">
+      <div class="ava sq">${icon('smile',30,'#4A9F8C',1.6)}</div>
+      <div class="grow"><div style="font-weight:700;font-size:16px">${esc(d.name)}</div>
+      <div class="small teal" style="font-weight:500;margin-top:3px">${esc(d.spec)} ✦ Available ${day===today()?'today':relDay(day).toLowerCase()==='tomorrow'?'tomorrow':fmtShort(day)}</div>
+      <div class="small muted" style="margin-top:3px">${icon('star',12,'#E8A33D',2)} ${d.rating} · ${d.exp} yrs · ${esc(d.fee)}</div></div></div>
+    <div class="slots">${slots.map(t=>`<button class="slot ${sel&&pick.day===day&&pick.time===t?'on':''}" onclick="quickPick('${d.id}','${day}','${t}')">${t}</button>`).join('')}</div>
+    ${sel ? `<button class="btn btn-primary" style="margin-top:14px;font-size:15px" onclick="openBook('${d.id}','${pick.day}','${pick.time}')">Book Appointment</button>`
+          : `<div class="small teal" style="margin-top:12px">Select a time to continue</div>`}
+  </div>`;
+}
+window.quickPick = (id, day, t) => {
+  const keep = document.getElementById('scr').scrollTop;
+  pick = (pick.doc===id && pick.time===t) ? {doc:null} : {doc:id, day, time:t};
+  render(); document.getElementById('scr').scrollTop = keep;
+};
+
+/* doctor profile + full schedule */
+ROUTES.doctor = r => {
+  const d = doc(r.id); if (!d) return ROUTES.doctors(r);
+  const resched = r.q.get('resched');
+  if (pick.doc !== d.id || !pick.day) pick = {doc:d.id, day:firstDayWithSlots(d.id), time:null};
+  const days = Array.from({length:14}, (_,i)=>dayKey(addDays(new Date(),i)));
+  return {tab:'doctors', body:`
+    ${header(resched?'Reschedule':'Doctor','doctors')}
+    <div class="row"><div class="ava sq" style="width:76px;height:76px">${icon('smile',36,'#4A9F8C',1.6)}</div>
+      <div class="grow"><div style="font-weight:700;font-size:20px">${esc(d.name)}</div><div class="teal small" style="font-weight:600;margin-top:3px">${esc(d.spec)}</div>
+      <div class="small muted" style="margin-top:4px">${icon('pin',12,'#888')} ${esc(d.clinic)}</div></div></div>
+    <div class="services" style="grid-template-columns:repeat(3,1fr);margin-top:16px">
+      <div class="svc" style="cursor:default"><b style="font-size:16px">${d.rating}</b>Rating</div>
+      <div class="svc" style="cursor:default"><b style="font-size:16px">${d.exp} yrs</b>Experience</div>
+      <div class="svc" style="cursor:default"><b style="font-size:16px">${esc(d.fee)}</b>Fee</div></div>
+    <p style="font-size:14px;color:#555;margin-top:16px;line-height:1.5">${esc(d.about)}</p>
+    <h2>Choose a day</h2>
+    <div class="days">${days.map(k=>{const x=parseDay(k);return `<button class="day ${k===pick.day?'on':''}" onclick="pick.day='${k}';pick.time=null;keepRender()">${WD[x.getDay()]}<b>${x.getDate()}</b></button>`}).join('')}</div>
+    <h2 style="margin-top:12px">Available time</h2>
+    <div class="slots" style="margin-top:0">${TIMES.map(t=>{const st=slotState(d.id,pick.day,t);
+      return `<button class="slot ${pick.time===t?'on':''}" ${st!=='free'?'disabled':''} title="${st==='busy'?'Occupied':st==='mine'?'Your booking':st==='past'?'Time passed':'Free'}" onclick="pick.time='${t}';keepRender()">${t}</button>`}).join('')}</div>
+    <p class="small muted" style="margin-top:8px">Crossed-out times are already taken.</p>
+    <button class="btn btn-primary" style="margin-top:20px" ${pick.time?'':'disabled'} onclick="openBook('${d.id}',pick.day,pick.time,'${resched||''}')">${resched?'Move appointment':'Book Appointment'}</button>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="openChat('${d.id}')">${icon('chat',18)} Message doctor</button>
+  `};
+};
+window.keepRender = () => { const s = document.getElementById('scr').scrollTop; render(); document.getElementById('scr').scrollTop = s; };
+
+window.openBook = (docId, day, time, resched='') => {
+  const d = doc(docId);
+  sheet(`<h3>Confirm appointment</h3><p class="small muted" style="margin-bottom:10px">Please check the details.</p>
+    <div class="kv"><span>Doctor</span><span>${esc(d.name)}</span></div>
+    <div class="kv"><span>Specialty</span><span>${esc(d.spec)}</span></div>
+    <div class="kv"><span>Date</span><span>${fmtDay(day)}</span></div>
+    <div class="kv"><span>Time</span><span>${fmtTime(time)}</span></div>
+    <div class="kv"><span>Fee</span><span>${esc(d.fee)}</span></div>
+    ${resched?'':`<label class="f" for="breason">Reason for visit (optional)</label><input class="input" id="breason" maxlength="120" placeholder="e.g. chest pain, check-up">`}
+    <div class="err-msg" id="bErr"></div>
+    <button class="btn btn-primary" style="margin-top:16px" id="bOk">Confirm</button>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="closeSheet()">Back</button>`);
+  document.getElementById('bOk').onclick = () => {
+    // server-side style validation: slot must still be free and patient must not have another visit at the same time
+    if (slotState(docId, day, time) !== 'free') { document.getElementById('bErr').textContent = 'Sorry, this slot was just taken. Please choose another time.'; return; }
+    const clash = D().bookings.find(b => b.status==='booked' && b.date===day && b.time===time && b.id!==resched);
+    if (clash) { document.getElementById('bErr').textContent = `You already have an appointment with ${doc(clash.doctorId).name} at this time.`; return; }
+    let b;
+    if (resched) { b = D().bookings.find(x=>x.id===resched); Object.assign(b, {doctorId:docId, date:day, time}); }
+    else { b = {id:uid(), doctorId:docId, date:day, time, status:'booked', reason:document.getElementById('breason').value.trim()}; D().bookings.push(b); }
+    save(); pick = {doc:null}; closeSheet(); go('booked/'+b.id+(resched?'?r=1':''));
+  };
+};
+ROUTES.booked = r => {
+  const b = D().bookings.find(x=>x.id===r.id); if (!b) return ROUTES.home(r); const d = doc(b.doctorId);
+  return {tab:'home', body:`
+    <div class="success-ic">${icon('check',46,'#2F7D6B',2.6)}</div>
+    <h1 style="text-align:center;font-size:24px">${r.q.get('r')?'Appointment moved':'Appointment booked!'}</h1>
+    <p class="muted" style="text-align:center;margin:8px 0 22px;font-size:14px">We will remind you one hour before the visit.</p>
+    <div class="card"><div class="row"><div class="ava">${initials(d.name)}</div><div class="grow"><b>${esc(d.name)}</b><div class="small teal">${esc(d.spec)}</div></div></div>
+      <div class="kv" style="margin-top:10px"><span>Date</span><span>${fmtDay(b.date)}</span></div>
+      <div class="kv"><span>Time</span><span>${fmtTime(b.time)}</span></div>
+      <div class="kv" style="border:none"><span>Clinic</span><span>${esc(d.clinic)}</span></div></div>
+    <button class="btn btn-primary" onclick="go('home')">Back to Home</button>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="openChat('${d.id}')">Message ${esc(d.name)}</button>`};
+};
+
+/* ============ S4 PROFILE ============ */
+ROUTES.profile = () => {
+  const u = me();
+  const item = (ic, label, to) => `<button onclick="${to}">${icon(ic,22,'#4A9F8C',1.6)}<span class="grow">${label}</span>${icon('chev',16,'#bbb')}</button>`;
+  return {tab:'profile', body:`
+    ${header('Profile')}
+    <div class="card row" style="padding:16px">
+      <div class="ava" style="width:64px;height:64px;font-size:22px;background:#2f3a37;color:#fff">${initials(u.name)}</div>
+      <div><div style="font-weight:600;color:#2F7D6B">${esc(u.name)}</div><div class="small muted" style="margin-top:4px">${u.phone?fmtPhone(u.phone):'IIN '+esc(u.iin)}</div></div></div>
+    <div class="menu" style="margin-top:12px">
+      ${item('user','Personal Information',"go('personal')")}
+      ${item('file','Medical Records',"go('records')")}
+      ${item('pill','Medications',"go('meds')")}
+      ${item('home','Home Visit',"go('visits')")}
+      ${item('chat','Chat History',"go('chats')")}
+      ${item('calendar','My Appointments',"go('appointments')")}
+      ${item('settings','Settings',"go('settings')")}
+      ${item('help','Help & Support',"go('help')")}
+    </div>
+    <div class="mint-hero" style="margin-top:18px;padding:14px">
+      <div class="circle" style="width:52px;height:52px">${icon('hands',28,'#2F7D6B',1.6)}</div>
+      <div><h3 style="font-size:14px">Your health is our priority</h3><p>Stay healthy, stay connected</p></div></div>
+    <button class="btn btn-outline" style="margin-top:18px;color:var(--danger)" onclick="logout()">${icon('logout',18)} Log out</button>`};
+};
+window.logout = () => confirmBox('Log out?', 'You will need to enter your IIN/phone and password again.', 'Log out', () => { S.session = null; save(); go('login'); });
+
+ROUTES.personal = () => {
+  const u = me();
+  const f = (id,label,val,type='text',ph='') => `<label class="f" for="${id}">${label}</label><input class="input" id="${id}" type="${type}" value="${esc(val)}" placeholder="${ph}"><div class="err-msg" id="${id}Err"></div>`;
+  return {tab:'profile', body:`
+    ${header('Personal Info','profile')}
+    <form id="pForm" novalidate>
+      ${f('pname','Full name',u.name)}
+      ${f('pphone','Phone',u.phone?fmtPhone(u.phone):'','tel','+7 ___ ___ __ __')}
+      ${f('piin','IIN',u.iin,'text','12 digits')}
+      ${f('pbirth','Date of birth',u.birth,'date')}
+      <label class="f" for="pblood">Blood type</label>
+      <select class="input" id="pblood">${['','O (I) Rh+','O (I) Rh−','A (II) Rh+','A (II) Rh−','B (III) Rh+','B (III) Rh−','AB (IV) Rh+','AB (IV) Rh−'].map(b=>`<option ${b===u.blood?'selected':''} value="${b}">${b||'Not specified'}</option>`).join('')}</select>
+      ${f('pallergy','Allergies',u.allergies,'text','e.g. Penicillin')}
+      ${f('paddr','Home address (for home visits)',u.address)}
+      <button class="btn btn-primary" style="margin-top:22px">Save changes</button>
+    </form>`, after(){
+    document.getElementById('pForm').onsubmit = e => {
+      e.preventDefault();
+      const v = id => document.getElementById(id).value.trim();
+      const ph = v('pphone') ? normalizeId(v('pphone')) : {phone:''};
+      let ok = setErr('pname', v('pname').length<2 ? 'Enter your name' : '');
+      ok = setErr('pphone', !ph || !('phone' in ph) ? 'Phone must look like +7 777 123 45 67' : '') && ok;
+      ok = setErr('piin', v('piin') && !/^\d{12}$/.test(v('piin')) ? 'IIN must be 12 digits' : '') && ok;
+      if (ok && !ph.phone && !v('piin')) ok = setErr('pphone','Keep at least a phone or an IIN to log in');
+      if (!ok) return;
+      Object.assign(u, {name:v('pname'), phone:ph.phone, iin:v('piin'), birth:v('pbirth'), blood:v('pblood'), allergies:v('pallergy'), address:v('paddr')});
+      save(); toast('Saved'); go('profile');
+    };
+  }};
+};
+
+ROUTES.appointments = () => {
+  const all = D().bookings.slice().sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const up = upcomingBookings(), upIds = new Set(up.map(b=>b.id));
+  const past = all.filter(b=>!upIds.has(b.id));
+  const row = (b, click) => { const d = doc(b.doctorId); return `<button class="card" ${click?`onclick="apptSheet('${b.id}')"`:'style="cursor:default"'}>
+    <div class="row"><div class="grow"><div class="teal" style="font-weight:600;font-size:14px">${esc(d.name)} - ${esc(d.spec)}</div>
+    <div class="small muted" style="margin-top:6px">${fmtDay(b.date)} · ${fmtTime(b.time)}</div></div>
+    <span class="badge ${b.status==='cancelled'?'red':click?'':'grey'}">${b.status==='cancelled'?'Cancelled':click?'Upcoming':'Completed'}</span></div></button>`; };
+  return {tab:'profile', body:`${header('Appointments','profile')}
+    <h2 style="margin-top:0">Upcoming</h2>${up.length?up.map(b=>row(b,true)).join(''):'<div class="empty">Nothing planned.</div>'}
+    <h2>Past & cancelled</h2>${past.length?past.map(b=>row(b,false)).join(''):'<div class="empty">No history yet.</div>'}
+    <button class="btn btn-primary" onclick="go('doctors')">Book new appointment</button>`};
+};
+
+ROUTES.settings = () => ({tab:'profile', body:`${header('Settings','profile')}
+  <label class="switch">Larger text<input type="checkbox" ${S.settings.big?'checked':''} onchange="S.settings.big=this.checked;save();render()"></label>
+  <label class="switch">Medication & visit reminders<input type="checkbox" ${S.settings.notif?'checked':''} onchange="S.settings.notif=this.checked;save();toast(this.checked?'Reminders on':'Reminders off')"></label>
+  <h2>Privacy</h2>
+  <p class="small muted" style="line-height:1.5">Your records are visible only to you and to doctors you have an appointment or chat with. All data in this prototype is stored only in this browser.</p>
+  <button class="btn btn-danger" style="margin-top:22px" onclick="confirmBox('Reset demo data?','All bookings, messages and changes in this browser will be deleted and the demo data restored.','Reset',()=>{S=freshStore();save();go('login');render();toast('Demo data restored')})">Reset demo data</button>`});
+
+ROUTES.help = () => ({tab:'profile', body:`${header('Help & Support','profile')}
+  <div class="card" style="background:#fff3f2;border-color:#f3c7c4"><div class="row">${icon('phone',22,'#c0392b')}<div><b style="font-size:14px">Emergency? Call 103</b><div class="small muted">MedCare is not for urgent or life-threatening situations.</div></div></div></div>
+  <details><summary>How do I book an appointment?</summary><p>Open “Book Appointment”, choose a specialty or search by name, pick a free time and confirm.</p></details>
+  <details><summary>How do I cancel or reschedule?</summary><p>Tap the appointment on the Home screen, then choose “Reschedule” or “Cancel appointment”.</p></details>
+  <details><summary>Who can see my medical records?</summary><p>Only you and the doctors involved in your care. Administrators manage schedules but do not see clinical details.</p></details>
+  <details><summary>How fast do doctors reply in chat?</summary><p>Usually within the working day. For urgent problems call 103.</p></details>
+  <details><summary>How does a home visit work?</summary><p>Send a request with your address and preferred time. The clinic confirms it and the doctor comes to you.</p></details>
+  <button class="btn btn-primary" style="margin-top:10px" onclick="openChat('tamerlan')">Contact support</button>`});
+
+/* ============ S5 CHATS ============ */
+function lastMsg(c){ return c.msgs[c.msgs.length-1]; }
+function chatTime(t){ const d = new Date(t), k = dayKey(d); return k===today() ? fmtTime(`${pad(d.getHours())}:${pad(d.getMinutes())}`) : k===dayKey(addDays(new Date(),-1)) ? 'Yesterday' : fmtShort(k); }
+ROUTES.chats = () => {
+  const list = Object.entries(D().chats).filter(([,c])=>c.msgs.length).sort((a,b)=>lastMsg(b[1]).t-lastMsg(a[1]).t);
+  return {tab:'chats', body:`
+    ${header('Ask the Doctor')}
+    <div class="mint-hero"><div class="circle">${icon('ask',40,'#2F7D6B',1.7)}</div>
+      <div class="grow"><h3>Have a question?</h3><p>Write to a doctor and get an answer within the day</p>
+      <button class="btn btn-primary btn-sm" style="margin-top:10px" onclick="newChat()">New chat</button></div></div>
+    <h2>Recent Chats</h2>
+    ${list.length ? list.map(([id,c])=>{ const d = doc(id), m = lastMsg(c); return `
+      <button class="card" onclick="openChat('${id}')"><div class="row">
+        <div class="ava">${icon('user',24,'#2F7D6B',2)}</div>
+        <div class="grow"><div class="row" style="gap:6px"><b class="grow" style="font-size:13px">${esc(d.name)}</b><span class="small muted">${chatTime(m.t)}</span></div>
+        <div class="row" style="gap:6px;margin-top:5px"><span class="grow small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.from==='me'?'You: ':''}${esc(m.text)}</span>${c.unread?`<span class="dot">${c.unread}</span>`:''}</div></div></div></button>`}).join('')
+      : '<div class="empty">No chats yet. Start one with a doctor.</div>'}`};
+};
+window.newChat = () => sheet(`<h3>Choose a doctor</h3><div style="margin-top:10px">${DOCTORS.map(d=>`
+  <button class="card" style="margin-bottom:8px;padding:10px" onclick="closeSheet();openChat('${d.id}')"><div class="row"><div class="ava" style="width:40px;height:40px;font-size:13px">${initials(d.name)}</div>
+  <div class="grow"><b style="font-size:14px">${esc(d.name)}</b><div class="small teal">${esc(d.spec)}</div></div></div></button>`).join('')}</div>`);
+window.openChat = id => { closeSheet(); go('chat/'+id); };
+
+const REPLIES = [
+  [/head|голов|migraine/i, 'Headaches can have many causes. Rest, drink water and avoid screens for a while. If the pain is very strong, sudden, or comes with fever or weakness, please call 103.'],
+  [/pain|боль|hurt/i, 'Thank you. How strong is the pain on a scale of 1 to 10, and how long has it lasted?'],
+  [/medic|pill|tablet|лекар|таблет|food/i, 'Most of your current medicines are best taken after a meal. Please do not change the dose without consulting me.'],
+  [/fever|температ|temperature/i, 'Please measure your temperature twice a day. If it stays above 38.5°C for more than 3 days, book a visit or request a home visit.'],
+  [/appoint|book|запис|visit/i, 'You can book a convenient time from my profile — tap “Book Appointment”. I have free slots this week.'],
+  [/thank|спасиб|рахмет/i, 'You are welcome! Take care and write if anything changes.'],
+  [/hi|hello|привет|здравств|сәлем/i, 'Hello! How can I help you today?'],
+];
+function autoReply(text){ for (const [re, a] of REPLIES) if (re.test(text)) return a; return 'Thank you for your message. I will review it and answer in more detail shortly. If symptoms get worse, please book an appointment.'; }
+
+const typingFor = {};
+ROUTES.chat = r => {
+  const d = doc(r.id); if (!d) return ROUTES.chats(r);
+  const chats = D().chats; if (!chats[d.id]) chats[d.id] = {unread:0, msgs:[]};
+  const c = chats[d.id]; if (c.unread) { c.unread = 0; save(); }
+  let lastDay = '';
+  const msgs = c.msgs.map(m => { const k = dayKey(new Date(m.t)); const sep = k!==lastDay ? `<div class="small muted" style="text-align:center;margin:8px 0">${relDay(k)}</div>` : ''; lastDay = k;
+    return sep + `<div class="msg ${m.from}">${esc(m.text)}<time>${fmtTime(`${pad(new Date(m.t).getHours())}:${pad(new Date(m.t).getMinutes())}`)}</time></div>`; }).join('');
+  return {raw:true, body:`
+    <div class="chat-head"><button class="back" aria-label="Back" onclick="go('chats')">${icon('back',24,'currentColor',2.4)}</button>
+      <div class="ava" style="width:40px;height:40px">${icon('user',22,'#2F7D6B',2)}</div>
+      <div class="grow"><b>${esc(d.name)}</b><div class="small teal">${esc(d.spec)} · Online</div></div>
+      <button class="btn btn-outline btn-sm" style="font-size:12px" onclick="go('doctor/${d.id}')">Book</button></div>
+    <main class="screen" id="scr" style="padding-top:14px"><div class="thread" id="thread">
+      ${msgs || `<div class="empty">Start the conversation with ${esc(d.name)}.<br><span class="small">Describe your symptoms or ask a question.</span></div>`}
+      ${typingFor[d.id] ? `<div class="typing">${esc(d.name)} is typing…</div>`:''}</div></main>
+    <form class="composer" id="composer"><input class="input" id="msgIn" placeholder="Type a message…" autocomplete="off" aria-label="Message" maxlength="500">
+      <button class="send" aria-label="Send">${icon('send',20,'#fff',2)}</button></form>`,
+  after(){
+    const s = document.getElementById('scr'); s.scrollTop = s.scrollHeight;
+    const inp = document.getElementById('msgIn'); inp.focus({preventScroll:true});
+    document.getElementById('composer').onsubmit = e => {
+      e.preventDefault(); const text = inp.value.trim(); if (!text) return;
+      c.msgs.push({from:'me', text, t:Date.now()}); save();
+      typingFor[d.id] = true; render();
+      setTimeout(() => {
+        load(); const cc = S.data[S.session]?.chats[d.id]; if (!cc) return;
+        cc.msgs.push({from:'doc', text:autoReply(text), t:Date.now()});
+        typingFor[d.id] = false;
+        if (route().name === 'chat' && route().id === d.id) { save(); render(); }
+        else { cc.unread = (cc.unread||0)+1; save(); if (S.session) render(); toast('New message from '+d.name); }
+      }, 1500 + Math.random()*1200);
+    };
+  }};
+};
+
+/* ============ S6 MEDICAL RECORDS ============ */
+ROUTES.records = r => {
+  const f = r.q.get('f') || 'All', q = (r.q.get('q')||'').toLowerCase();
+  const recIcon = t => t==='Lab Results' ? 'flask' : t==='Prescriptions' ? 'rx' : 'file';
+  const list = D().records.filter(x => (f==='All'||x.type===f) && (!q || (x.title+' '+doc(x.doctorId).name+' '+x.sub).toLowerCase().includes(q)))
+    .sort((a,b)=>b.date.localeCompare(a.date));
+  const qs = (ff, qq=q) => `records?f=${encodeURIComponent(ff)}${qq?'&q='+encodeURIComponent(qq):''}`;
+  return {tab:'records', body:`
+    ${header('Medical Records')}
+    <form class="search" onsubmit="event.preventDefault();go('records?f=${encodeURIComponent(f)}'+(this.q.value?'&q='+encodeURIComponent(this.q.value):''))">
+      ${icon('search',18)}<input class="input" name="q" value="${esc(r.q.get('q')||'')}" placeholder="Search doctors or specialities.." aria-label="Search records"></form>
+    <div class="chips">${['All','Visits','Lab Results','Prescriptions'].map(c=>`<button class="chip outline ${c===f?'on':''}" onclick="go('${qs(c)}')">${c}</button>`).join('')}</div>
+    <div style="margin-top:10px">${list.length ? list.map(x=>{ const d = doc(x.doctorId); return `
+      <button class="card" style="padding:16px" onclick="recordSheet('${x.id}')"><div class="row" style="align-items:flex-start">
+        <div class="ava" style="width:44px;height:44px">${icon(recIcon(x.type),22,'#4A9F8C',1.6)}</div>
+        <div class="grow"><b style="font-size:14px">${esc(x.title)}</b><div class="small muted" style="margin-top:3px">${fmtDay(x.date)} - ${fmtTime(x.time)}</div>
+          <div style="font-size:14px;margin-top:8px">${esc(d.name)}</div><div class="small muted" style="margin-top:3px">${esc(x.sub)}</div></div>
+        <span style="align-self:center">${icon('chev',18,'#888')}</span></div></button>`}).join('')
+      : '<div class="empty">No records found.</div>'}</div>`};
+};
+window.recordSheet = id => {
+  const x = D().records.find(r=>r.id===id), d = doc(x.doctorId);
+  sheet(`<h3>${esc(x.title)}</h3><div class="small muted">${fmtDay(x.date)} · ${fmtTime(x.time)}</div>
+    <div class="kv" style="margin-top:10px"><span>Doctor</span><span>${esc(d.name)}</span></div>
+    <div class="kv"><span>Specialty</span><span>${esc(d.spec)}</span></div>
+    <div class="kv"><span>Type</span><span>${esc(x.type)}</span></div>
+    ${x.lab?`<table class="lab"><tr><th>Test</th><th>Result</th><th>Normal</th></tr>${x.lab.map(l=>`<tr><td>${l[0]}</td><td><b>${l[1]}</b></td><td class="muted">${l[2]}</td></tr>`).join('')}</table>`:''}
+    <h2 style="font-size:15px;margin:16px 0 6px">Doctor's notes</h2><p style="font-size:14px;line-height:1.55;color:#444">${esc(x.notes)}</p>
+    <button class="btn btn-primary" style="margin-top:18px" onclick="openChat('${d.id}')">Ask ${esc(d.name)} about this</button>
+    <button class="btn btn-outline" style="margin-top:10px" onclick="closeSheet()">Close</button>`);
+};
+
+/* ============ S7 MEDICATION ============ */
+const takenKey = (m, day, t) => `${m.id}|${day}|${t}`;
+function nextDose(){
+  const meds = D().meds.filter(m=>m.status==='current');
+  const n = nowHM(), k = today(), tm = dayKey(addDays(new Date(),1));
+  let best = null;
+  for (const m of meds) for (const [day, after] of [[k, n],[tm, '']]) {
+    if (day > m.end || day < m.start) continue;
+    for (const t of m.times) { if (t <= after && day===k) continue; if (D().taken[takenKey(m,day,t)]) continue;
+      if (!best || (day+t) < (best.day+best.time)) best = {med:m, day, time:t}; }
+  }
+  return best;
+}
+function medBadge(m){
+  if (m.status==='upcoming') return `<span class="badge grey">From ${fmtShort(m.start)}</span>`;
+  if (m.status==='history') return `<span class="badge grey">Completed</span>`;
+  const n = nowHM(), k = today();
+  const todayLeft = m.times.some(t => t > n && !D().taken[takenKey(m,k,t)]);
+  return todayLeft ? `<span class="badge">Today</span>` : `<span class="badge grey">Tomorrow</span>`;
+}
+ROUTES.meds = r => {
+  const tab = r.q.get('t') || 'current';
+  const list = D().meds.filter(m=>m.status===tab);
+  const nd = nextDose();
+  return {tab:'home', body:`
+    ${header('Medication')}
+    <div class="mint-hero"><div class="circle">${icon('pill',40,'#2F7D6B',1.6)}</div>
+      <div><h3>Your Medications</h3><p>Take your medicine on time for a healthier you</p></div></div>
+    <div class="seg">${[['current','Current'],['upcoming','Upcoming'],['history','History']].map(([k,l])=>`<button class="chip ${k===tab?'on':''}" onclick="go('meds?t=${k}')">${l}</button>`).join('')}</div>
+    <div style="margin-top:12px">${list.length ? list.map(m=>`
+      <button class="card" style="padding:16px" onclick="medSheet('${m.id}')"><div class="row">
+        <div class="ava">${icon('pill',24,'#4A9F8C',1.6)}</div>
+        <div class="grow"><div class="row" style="gap:6px"><b class="grow" style="font-size:14px">${esc(m.name)}</b>${medBadge(m)}</div>
+        <div class="small muted" style="margin-top:5px">${esc(m.dose)} • ${esc(m.when)}</div>
+        <div class="small" style="margin-top:5px;font-weight:600">${esc(m.freq)} · ${m.times.join(', ')}</div></div>${icon('chev',18,'#888')}</div></button>`).join('')
+      : '<div class="empty">Nothing here.</div>'}</div>
+    ${tab==='current' && nd ? `<button class="card" style="background:var(--mint);border:none;padding:18px" onclick="medSheet('${nd.med.id}')"><div class="row">
+      ${icon('bell',22,'#2F7D6B')}<div class="grow"><b style="font-size:14px">Next dose</b><div class="small" style="margin-top:3px">${relDay(nd.day)}, ${fmtTime(nd.time)} — ${esc(nd.med.name)}</div></div>${icon('chev',18,'#4A9F8C')}</div></button>`:''}
+    ${tab==='current' && !nd && list.length ? `<div class="card" style="background:var(--mint-soft);border:none;text-align:center;font-size:14px">${icon('check',18,'#2F7D6B')} All doses for today and tomorrow are taken</div>`:''}`};
+};
+window.medSheet = id => {
+  const m = D().meds.find(x=>x.id===id), k = today();
+  const doses = m.times.map(t => { const key = takenKey(m,k,t), done = !!D().taken[key];
+    return `<label class="switch"><span>${icon('clock',16,'#888')} ${fmtTime(t)} ${done?'<span class="badge" style="margin-left:6px">Taken</span>':''}</span>
+      <input type="checkbox" ${done?'checked':''} onchange="toggleDose('${key}',this.checked,'${m.id}')" aria-label="Taken at ${t}"></label>`; }).join('');
+  sheet(`<div class="row"><div class="ava">${icon('pill',24,'#4A9F8C',1.6)}</div><div><h3>${esc(m.name)}</h3><div class="small muted">${esc(m.dose)} • ${esc(m.when)}</div></div></div>
+    <div class="kv" style="margin-top:12px"><span>Frequency</span><span>${esc(m.freq)}</span></div>
+    <div class="kv"><span>Course</span><span>${fmtDay(m.start)} – ${fmtDay(m.end)}</span></div>
+    ${m.status==='current' && k>=m.start && k<=m.end ? `<h2 style="font-size:15px;margin:16px 0 0">Today's doses</h2>${doses}` : ''}
+    <p class="small muted" style="margin-top:14px">Do not change the dose without consulting your doctor.</p>
+    <button class="btn btn-outline" style="margin-top:14px" onclick="closeSheet()">Close</button>`);
+};
+window.toggleDose = (key, v, id) => { if (v) D().taken[key] = Date.now(); else delete D().taken[key]; save(); render(); medSheet(id); toast(v?'Dose marked as taken':'Mark removed'); };
+
+/* ============ S8 HOME VISIT ============ */
+const BANNER = `<svg viewBox="0 0 340 140" width="100%" role="img" aria-label="Doctor visiting a patient at home">
+  <rect width="340" height="140" fill="#BDF5D9"/>
+  <path d="M30 30h40v-20h40v20h40v40h-40v60h-40v-60h-40z" fill="#2F6B5A" opacity=".85"/>
+  <rect x="60" y="50" width="70" height="60" rx="6" fill="#F4EEDD"/>
+  <rect x="68" y="80" width="34" height="22" rx="5" fill="#B5763A"/><circle cx="85" cy="70" r="7" fill="#C49C7A"/>
+  <circle cx="114" cy="66" r="6" fill="#7a5a43"/><rect x="108" y="72" width="12" height="26" rx="4" fill="#2F7D6B"/>
+  <rect x="40" y="112" width="110" height="16" rx="3" fill="#2F6B5A"/><text x="95" y="124" text-anchor="middle" font-size="9" font-family="Inter" fill="#fff" font-weight="600">Compassionate Care</text>
+  <circle cx="262" cy="46" r="20" fill="#5b3a29"/><rect x="242" y="26" width="40" height="10" rx="5" fill="#222"/>
+  <path d="M222 140c0-34 18-58 40-58s40 24 40 58z" fill="#fff"/><path d="M252 84l10 20 10-20" fill="#b9d8ee"/>
+  <path d="M248 92c-6 16 4 28 14 28M276 92c6 16-4 28-14 28" stroke="#333" stroke-width="2.5" fill="none"/><circle cx="262" cy="121" r="4" fill="#666"/>
+</svg>`;
+ROUTES.visits = () => {
+  const n = today();
+  const vs = D().visits.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const up = vs.filter(v => v.date >= n && v.status!=='Cancelled' && v.status!=='Completed');
+  const past = vs.filter(v => !up.includes(v)).reverse();
+  const badge = s => `<span class="badge ${s==='Pending'?'warn':s==='Cancelled'?'red':s==='Completed'?'grey':''}">${s}</span>`;
+  const card = v => { const d = doc(v.doctorId); return `<button class="card" onclick="visitSheet('${v.id}')"><div class="row" style="align-items:flex-start">
+    <div class="ava" style="width:44px;height:44px">${icon('home',22,'#4A9F8C',1.6)}</div>
+    <div class="grow"><div class="row" style="gap:6px"><b class="grow" style="font-size:14px">${fmtDay(v.date)}</b>${badge(v.status)}</div>
+    <div class="small muted" style="margin-top:3px">${fmtTime(v.from)} - ${fmtTime(v.to)}</div>
+    <div style="font-size:14px;margin-top:8px">${esc(d.name)}</div><div class="small muted">${esc(d.spec)}</div></div></div></button>`; };
+  return {tab:'home', body:`
+    ${header('Home Visit')}
+    <div class="banner">${BANNER}</div>
+    <button class="btn btn-primary" style="margin-top:16px" onclick="go('visitnew')">${icon('plus',18,'#fff',2.4)} Request a home visit</button>
+    <h2>Upcoming Visits</h2>${up.length?up.map(card).join(''):'<div class="empty">No upcoming visits.</div>'}
+    <h2>Past Visits</h2>${past.length?past.map(card).join(''):'<div class="empty">No past visits.</div>'}`};
+};
+window.visitSheet = id => {
+  const v = D().visits.find(x=>x.id===id), d = doc(v.doctorId);
+  const canCancel = v.status==='Pending' || v.status==='Confirmed';
+  sheet(`<h3>Home visit</h3><div class="small muted">${fmtDay(v.date)} · ${fmtTime(v.from)} - ${fmtTime(v.to)}</div>
+    <div class="kv" style="margin-top:10px"><span>Doctor</span><span>${esc(d.name)}</span></div>
+    <div class="kv"><span>Specialty</span><span>${esc(d.spec)}</span></div>
+    <div class="kv"><span>Address</span><span>${esc(v.address)}</span></div>
+    <div class="kv"><span>Reason</span><span>${esc(v.reason||'—')}</span></div>
+    <div class="kv"><span>Status</span><span>${esc(v.status)}</span></div>
+    ${canCancel?`<button class="btn btn-danger" style="margin-top:18px" onclick="confirmBox('Cancel home visit?','The doctor will be notified.','Yes, cancel',()=>{const x=D().visits.find(y=>y.id==='${v.id}');x.status='Cancelled';save();render();toast('Visit cancelled')})">Cancel visit</button>`:''}
+    <button class="btn btn-outline" style="margin-top:10px" onclick="closeSheet()">Close</button>`);
+};
+ROUTES.visitnew = () => {
+  const u = me(), min = dayKey(addDays(new Date(),1));
+  return {tab:'home', body:`${header('Request Visit','visits')}
+    <form id="vForm" novalidate>
+      <label class="f" for="vdoc">Doctor</label>
+      <select class="input" id="vdoc">${DOCTORS.map(d=>`<option value="${d.id}">${esc(d.name)} — ${esc(d.spec)}</option>`).join('')}</select>
+      <label class="f" for="vdate">Date</label><input class="input" id="vdate" type="date" min="${min}" value="${min}"><div class="err-msg" id="vdateErr"></div>
+      <label class="f" for="vtime">Time window</label>
+      <select class="input" id="vtime">${['09:00-10:00','11:00-12:00','14:00-15:00','16:00-17:00','18:00-19:00'].map(t=>`<option>${t}</option>`).join('')}</select>
+      <label class="f" for="vaddr">Address</label><input class="input" id="vaddr" value="${esc(u.address)}" placeholder="City, street, building, apartment"><div class="err-msg" id="vaddrErr"></div>
+      <label class="f" for="vreason">Symptoms / reason</label><textarea class="input" id="vreason" maxlength="300" placeholder="Briefly describe how you feel"></textarea><div class="err-msg" id="vreasonErr"></div>
+      <button class="btn btn-primary" style="margin-top:22px">Send request</button>
+    </form>`, after(){
+    document.getElementById('vForm').onsubmit = e => {
+      e.preventDefault(); const v = id => document.getElementById(id).value.trim();
+      let ok = setErr('vdate', !v('vdate') || v('vdate') < min ? 'Choose a date starting tomorrow' : '');
+      ok = setErr('vaddr', v('vaddr').length < 5 ? 'Enter your full address' : '') && ok;
+      ok = setErr('vreason', v('vreason').length < 3 ? 'Describe the reason for the visit' : '') && ok;
+      if (!ok) return;
+      const [from, to] = v('vtime').split('-');
+      const visit = {id:uid(), doctorId:v('vdoc'), date:v('vdate'), from, to, status:'Pending', address:v('vaddr'), reason:v('vreason')};
+      D().visits.push(visit); save(); go('visits'); toast('Request sent. The clinic will confirm it soon.');
+      // simulate clinic confirmation
+      setTimeout(() => { load(); const x = S.data[S.session]?.visits.find(y=>y.id===visit.id); if (x && x.status==='Pending') { x.status='Confirmed'; save(); render(); toast('Your home visit was confirmed'); } }, 6000);
+    };
+  }};
+};
+
+/* ============ START ============ */
+load(); render();
+</script>
+</body>
+</html>
